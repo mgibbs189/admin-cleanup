@@ -1,6 +1,12 @@
 # Admin Cleanup
 This plugin helps you organize your WordPress admin menu.
 
+**Why?**
+
+If your site has a bunch of custom post types, or many plugins with their own top-level menu, then the WP admin menu will quickly become overcroweded.
+
+This plugin lets you either hide menu items (e.g. Comments) entirely, or move them into a space-efficient dropdown within the WP Admin Bar.
+
 **Before:**
 
 <img src="http://i.imgur.com/F6y1NOH.png" width="695" height="" alt="580" />

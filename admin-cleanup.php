@@ -18,17 +18,20 @@ class Admin_Cleanup
 
 
     function __construct() {
-        add_action( 'init', array( $this, 'init' ) );
+        add_action( 'admin_init', array( $this, 'admin_init' ) );
         add_action( 'admin_menu', array( $this, 'admin_menu' ) );
-        add_action( 'admin_head', array( $this, 'hide_menu_items' ) );
-        add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 999 );
     }
 
 
-    function init() {
+    function admin_init() {
+
+        if ( is_admin() ) {
+            add_action( 'admin_head', array( $this, 'hide_menu_items' ) );
+            add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 999 );
+        }
 
         // Save settings
-        if ( isset( $_POST['item'] ) ) {
+        if ( isset( $_POST['item'] ) && current_user_can( 'manage_options' ) ) {
             update_option( 'admin_cleanup_settings', json_encode( $_POST['item'] ) );
         }
 

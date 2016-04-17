@@ -3,7 +3,7 @@ This plugin helps you organize your WordPress admin menu.
 
 **Why?**
 
-If your site has a bunch of custom post types, or many plugins with their own top-level menu, then the WP admin menu will quickly become overcroweded.
+If your site has a bunch of custom post types, or many plugins with their own top-level menu, then the WP admin menu will quickly become overcrowded.
 
 This plugin lets you hide menu items (e.g. `Tools`) entirely, or move them into the WP Admin Bar.
 

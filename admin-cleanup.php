@@ -130,7 +130,7 @@ class Admin_Cleanup
                         $('#adminmenu li.wp-menu-separator:eq(' + num + ')').addClass('hidden');
                     }
                     else {
-                        key = key.replace( /(\.|\?|\=|\,)/g, "-" );
+                        key = key.replace(/(\.|\?|\=|\,)/g, "-");
                         $('#adminmenu li#' + key).addClass('hidden');
                     }
                 }

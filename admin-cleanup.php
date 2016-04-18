@@ -3,7 +3,7 @@
 Plugin Name: Admin Cleanup
 Plugin URI: https://facetwp.com/
 Description: Clean up the admin sidebar menu
-Version: 0.1
+Version: 0.2
 Author: Matt Gibbs
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -130,6 +130,7 @@ class Admin_Cleanup
                         $('#adminmenu li.wp-menu-separator:eq(' + num + ')').addClass('hidden');
                     }
                     else {
+                        key = key.replace( /(\.|\?|\=|\,)/g, "-" );
                         $('#adminmenu li#' + key).addClass('hidden');
                     }
                 }

@@ -15,6 +15,7 @@ class Admin_Cleanup
 
     public $menu;
     public $settings;
+    public $groups;
 
 
     function __construct() {
@@ -32,15 +33,43 @@ class Admin_Cleanup
 
         // Save settings
         if ( isset( $_POST['item'] ) && current_user_can( 'manage_options' ) ) {
+
+            $groups = get_option( 'admin_cleanup_groups', array() );
+
+            if( !empty( $_POST['new_group'] ) ){
+                $group_name = $_POST['new_group'];
+                $group_slug = sanitize_title( $group_name );                
+                if( empty( $groups[ $group_slug ] ) ){
+                    $groups[ $group_slug ] = $group_name;
+                }
+            }
+            if( !empty( $_POST['remove_group'] ) ){
+                foreach( $_POST['remove_group'] as $remove ){
+                    if( !empty( $groups[ $remove ] ) ){
+                        unset( $groups[ $remove ] );
+                        foreach ($_POST['item'] as &$location) {
+                            if( $remove == $location ){
+                                $location = 'show';
+                            }
+                        }
+                    }
+                }
+            }
+            update_option( 'admin_cleanup_groups', $groups );
             update_option( 'admin_cleanup_settings', json_encode( $_POST['item'] ) );
         }
 
-        // Load settings
-        $settings = get_option( 'admin_cleanup_settings' );
+        // Load settings & groups
+        $settings = get_option( 'admin_cleanup_settings', array() );
+        $groups = get_option( 'admin_cleanup_groups', array() );
         if ( ! empty( $settings ) ) {
             $settings = json_decode( $settings, true );
         }
+        if ( ! empty( $groups ) ) {
+            $groups = $groups;
+        }
         $this->settings = (array) $settings;
+        $this->groups = (array) $groups;
     }
 
 
@@ -73,18 +102,34 @@ class Admin_Cleanup
 
     function admin_bar_menu( $wp_admin_bar ) {
         $this->parse_menus();
-
-        $args = array(
-            'id'        => 'admin-cleanup',
-            'title'     => 'Menu',
-            'parent'    => false,
-            'href'      => '',
-            'meta'      => array(),
-        );
-        $wp_admin_bar->add_node( $args );
+        if( false !== array_search( 'move', $this->settings ) ){
+            $args = array(
+                'id'        => 'admin-cleanup',
+                'title'     => 'Menu',
+                'parent'    => false,
+                'href'      => '',
+                'meta'      => array(),
+            );
+            $wp_admin_bar->add_node( $args );
+        }
+        foreach( $this->groups as $group_slug => $group_name ){
+            $args = array(
+                'id'        => 'admin-cleanup-' . $group_slug,
+                'title'     => $group_name,
+                'parent'    => false,
+                'href'      => '',
+                'meta'      => array(),
+            );
+            $wp_admin_bar->add_node( $args );
+        }
 
         foreach ( $this->settings as $key => $val ) {
-            if ( 'move' == $val ) {
+            if ( 'hide' !== $val ) {
+                if( $val == 'move' ){
+                    $group = 'admin-cleanup';
+                }else{
+                    $group = 'admin-cleanup-' . $val;
+                }
                 $the_menu = $this->menu[ $key ];
                 $the_href = menu_page_url( $the_menu[2], false );
                 $the_href = empty( $the_href ) ? $the_menu[2] : $the_href;
@@ -93,7 +138,7 @@ class Admin_Cleanup
                 $args = array(
                     'id'        => $the_id,
                     'title'     => $the_menu[0],
-                    'parent'    => 'admin-cleanup',
+                    'parent'    => $group,
                     'href'      => $the_href,
                 );
                 $wp_admin_bar->add_node( $args );
@@ -124,7 +169,7 @@ class Admin_Cleanup
         $(function() {
             var settings = <?php echo json_encode( $this->settings ); ?>;
             $.each(settings, function(key, val) {
-                if ('move' == val || 'hide' == val) {
+                if ('show' != val ) {
                     if ('separator' == key.substr(0, 9)) {
                         var num = parseInt(key.substr(9)) - 1;
                         $('#adminmenu li.wp-menu-separator:eq(' + num + ')').addClass('hidden');
@@ -155,9 +200,12 @@ class Admin_Cleanup
         <form method="post" action="">
         <table>
             <tr>
-                <th style="width:50px">Show</th>
-                <th style="width:50px">Move</th>
-                <th style="width:50px">Hide</th>
+                <th style="width:50px;text-align: center;padding:0 6px;">Show</th>
+                <th style="width:50px;text-align: center;padding:0 6px;">Menu</th>
+                <?php foreach( $this->groups as $group ){ ?>
+                <th style="width:auto;text-align: center;padding:0 6px;"><?php echo $group; ?></th>
+                <?php } ?>
+                <th style="width:50px;text-align: center;padding:0 6px;">Hide</th>
                 <th><!-- Menu --></td>
             </tr>
 <?php
@@ -170,20 +218,32 @@ foreach ( $menu as $data ) {
 
     echo '<tr>';
 
-    $choices = array( 'show', 'move', 'hide' );
-    foreach ( $choices as $choice ) {
+    $choices = array_merge( array('show' => 'show','move' => 'move'), $this->groups, array( 'hide' => 'hide' ) );
+    foreach ( $choices as $choice => $choice_label) {
         $the_val = isset( $this->settings[ $data[5] ] ) ?
             $this->settings[ $data[5] ] : 'show';
 
         $checked = ( $choice == $the_val ) ? ' checked' : '';
-        echo '<td><input type="radio" name="item[' . $data[5] . ']" value="' . $choice . '"' . $checked . ' /></td>';
+        echo '<td style="text-align: center;"><input type="radio" name="item[' . $data[5] . ']" value="' . $choice . '"' . $checked . ' /></td>';
     }
 
     echo '<td>' . $data[0] . '</td>';
     echo '</tr>';
 }
-?>
+            if( !empty( $this->groups ) ){ ?>
+            <tr>
+                <th style="width:50px;text-align: center;border-top: 1px solid #bfbfbf;"></th>
+                <th style="width:50px;text-align: center;border-top: 1px solid #bfbfbf;"></th>
+                <?php foreach( $this->groups as $group_slug=>$group ){ ?>
+                <th style="width:auto;text-align: center;border-top: 1px solid #bfbfbf;"><input type="checkbox" name="remove_group[]" value="<?php echo $group_slug; ?>" /></th>
+                <?php } ?>
+                <th style="width:50px;text-align: center;border-top: 1px solid #bfbfbf;"></th>
+                <th style="border-top: 1px solid #bfbfbf;">Remove Group</td>
+            </tr>
+            <?php } ?>
             </table>
+            <hr>
+            <p><input placeholder="New Group" type="text" name="new_group" style="margin-right: 10px;"><input type="submit" class="button-primary" value="Add Group" /></p>
             <p><input type="submit" class="button-primary" value="Save Changes" /></p>
         </form>
     </div>

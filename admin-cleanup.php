@@ -113,14 +113,16 @@ class Admin_Cleanup
             $wp_admin_bar->add_node( $args );
         }
         foreach( $this->groups as $group_slug => $group_name ){
-            $args = array(
-                'id'        => 'admin-cleanup-' . $group_slug,
-                'title'     => $group_name,
-                'parent'    => false,
-                'href'      => '',
-                'meta'      => array(),
-            );
-            $wp_admin_bar->add_node( $args );
+            if( false !== array_search( $group_slug, $this->settings ) ){
+                $args = array(
+                    'id'        => 'admin-cleanup-' . $group_slug,
+                    'title'     => $group_name,
+                    'parent'    => false,
+                    'href'      => '',
+                    'meta'      => array(),
+                );
+                $wp_admin_bar->add_node( $args );
+            }
         }
 
         foreach ( $this->settings as $key => $val ) {

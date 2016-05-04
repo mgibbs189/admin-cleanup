@@ -162,7 +162,8 @@ class Admin_Cleanup
             </tr>
 <?php
 foreach ( $menu as $data ) {
-    if ( 'wp-menu-separator' == $data[4] ) {
+
+    if ( false !== strpos( $data[4], 'wp-menu-separator' ) ) {
         $data[0] = '---';
         $data[5] = $data[2];
     }

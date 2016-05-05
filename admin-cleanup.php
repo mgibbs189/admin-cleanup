@@ -132,6 +132,9 @@ class Admin_Cleanup
                 }else{
                     $group = 'admin-cleanup-' . $val;
                 }
+                // is menue item still valid?
+                if( empty( $this->menu[ $key ] ) ){ continue;}
+
                 $the_menu = $this->menu[ $key ];
                 $the_href = menu_page_url( $the_menu[2], false );
                 $the_href = empty( $the_href ) ? $the_menu[2] : $the_href;

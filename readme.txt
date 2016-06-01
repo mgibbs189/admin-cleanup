@@ -2,7 +2,7 @@
 Contributors: mgibbs189
 Tags: admin menu, admin bar, admin, cleanup, hide menu
 Requires at least: 4.4
-Tested up to: 4.5
+Tested up to: 4.5.2
 Stable tag: trunk
 License: GPLv2
 
@@ -30,6 +30,9 @@ This plugin lets you hide menu items (e.g. Tools) entirely, or move them into th
 3. Settings
 
 == Changelog ==
+
+= 1.0 =
+* Added support for custom menu groups (props David Cramer)
 
 = 0.2 =
 * Beta release

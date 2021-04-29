@@ -3,7 +3,7 @@
 Plugin Name: Admin Cleanup
 Plugin URI: https://facetwp.com/
 Description: Clean up the admin sidebar menu
-Version: 1.0.1
+Version: 1.0.2
 Author: Matt Gibbs
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -19,20 +19,20 @@ class Admin_Cleanup
 
 
     function __construct() {
-        add_action( 'admin_init', array( $this, 'admin_init' ) );
-        add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+        add_action( 'admin_init', [ $this, 'admin_init' ] );
+        add_action( 'admin_menu', [ $this, 'admin_menu' ] );
     }
 
 
     function admin_init() {
         if ( is_admin() ) {
-            add_action( 'admin_head', array( $this, 'hide_menu_items' ) );
-            add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 999 );
+            add_action( 'admin_head', [ $this, 'hide_menu_items' ] );
+            add_action( 'admin_bar_menu', [ $this, 'admin_bar_menu' ], 999 );
         }
 
         // Save settings
         if ( isset( $_POST['item'] ) && current_user_can( 'manage_options' ) ) {
-            $groups = get_option( 'admin_cleanup_groups', array() );
+            $groups = get_option( 'admin_cleanup_groups', [] );
 
             if ( ! empty( $_POST['new_group'] ) ) {
                 $group_name = $_POST['new_group'];
@@ -58,8 +58,8 @@ class Admin_Cleanup
         }
 
         // Load settings & groups
-        $settings = get_option( 'admin_cleanup_settings', array() );
-        $groups = get_option( 'admin_cleanup_groups', array() );
+        $settings = get_option( 'admin_cleanup_settings', [] );
+        $groups = get_option( 'admin_cleanup_groups', [] );
 
         if ( ! empty( $settings ) ) {
             $settings = json_decode( $settings, true );
@@ -73,14 +73,14 @@ class Admin_Cleanup
 
 
     function admin_menu() {
-        add_options_page( 'Admin Cleanup', 'Admin Cleanup', 'manage_options', 'admin-cleanup', array( $this, 'settings_page' ) );
+        add_options_page( 'Admin Cleanup', 'Admin Cleanup', 'manage_options', 'admin-cleanup', [ $this, 'settings_page' ] );
     }
 
 
     function parse_menus() {
         global $menu, $submenu;
 
-        $temp_menu = array();
+        $temp_menu = [];
         foreach ( $menu as $key => $data ) {
             $id = $data[2];
             $temp_menu[ $id ] = $data;
@@ -102,24 +102,24 @@ class Admin_Cleanup
     function admin_bar_menu( $wp_admin_bar ) {
         $this->parse_menus();
         if ( false !== array_search( 'move', $this->settings ) ) {
-            $args = array(
+            $args = [
                 'id'        => 'admin-cleanup',
                 'title'     => 'Menu',
                 'parent'    => false,
                 'href'      => '',
-                'meta'      => array(),
-            );
+                'meta'      => [],
+            ];
             $wp_admin_bar->add_node( $args );
         }
         foreach ( $this->groups as $group_slug => $group_name ) {
             if ( false !== array_search( $group_slug, $this->settings ) ) {
-                $args = array(
+                $args = [
                     'id'        => 'admin-cleanup-' . $group_slug,
                     'title'     => $group_name,
                     'parent'    => false,
                     'href'      => '',
-                    'meta'      => array(),
-                );
+                    'meta'      => [],
+                ];
                 $wp_admin_bar->add_node( $args );
             }
         }
@@ -134,14 +134,14 @@ class Admin_Cleanup
             $the_menu = $this->menu[ $key ];
             $the_href = menu_page_url( $the_menu[2], false );
             $the_href = empty( $the_href ) ? $the_menu[2] : $the_href;
-            $the_id = /*'ac-' . */$key;
+            $the_id = $key;
 
-            $args = array(
+            $args = [
                 'id'        => $the_id,
                 'title'     => $the_menu[0],
                 'parent'    => $group,
                 'href'      => $the_href,
-            );
+            ];
             $wp_admin_bar->add_node( $args );
 
             if ( isset( $the_menu['children'] ) ) {
@@ -149,12 +149,12 @@ class Admin_Cleanup
                     $the_href = menu_page_url( $child[2], false );
                     $the_href = empty( $the_href ) ? $child[2] : $the_href;
 
-                    $args = array(
+                    $args = [
                         'id'        => $the_id . '-' . $key,
                         'title'     => $child[0],
                         'parent'    => $the_id,
                         'href'      => $the_href,
-                    );
+                    ];
                     $wp_admin_bar->add_node( $args );
                 }
             }
@@ -218,7 +218,7 @@ class Admin_Cleanup
 
             echo '<tr>';
 
-            $choices = array_merge( array( 'show' => 'show', 'move' => 'move' ), $this->groups, array( 'hide' => 'hide' ) );
+            $choices = array_merge( [ 'show' => 'show', 'move' => 'move' ], $this->groups, [ 'hide' => 'hide' ] );
             foreach ( $choices as $choice => $choice_label ) {
                 $the_val = isset( $this->settings[ $data[5] ] ) ?
                     $this->settings[ $data[5] ] : 'show';

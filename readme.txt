@@ -2,7 +2,7 @@
 Contributors: mgibbs189
 Tags: admin menu, admin bar, admin, cleanup, hide menu
 Requires at least: 4.8
-Tested up to: 5.0
+Tested up to: 5.7.1
 Stable tag: trunk
 License: GPLv2
 
@@ -30,6 +30,10 @@ This plugin lets you hide menu items (e.g. Tools) entirely, or move them into th
 3. Settings
 
 == Changelog ==
+
+= 1.0.2 =
+* Ensure WP 5.7 compatibility
+* Switched to PHP array shorthand
 
 = 1.0.1 =
 * Ensure WP 5.0 compatibility
